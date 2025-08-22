@@ -1,4 +1,4 @@
-# API de Transferências e Usuários
+# API de Transferências e Usuários - Angela
 
 Esta API permite o registro, login, consulta de usuários e transferências de valores entre usuários. O objetivo é servir de base para estudos de testes e automação de APIs.
 
