@@ -13,7 +13,7 @@ const transferService = require('../../service/transferService');
 describe('Transfer Controller', () => {
     describe('POST /transfers', () => {
         it('Quando informo remetente e destinatario inexistentes recebo 400', async () => {
-            const resposta = await request(app)
+            const resposta = await request('http://localhost:3000')
                 .post('/transfers')
                 .send({
                     from: "julio",
