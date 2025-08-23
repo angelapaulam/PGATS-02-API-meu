@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const transferService = require('../service/transferService');
+const authMiddleware = require('../service/authMiddleware');
+
+router.use(authMiddleware); // Apply middleware to all transfer routes
 
 router.post('/', (req, res) => {
   const { from, to, value } = req.body;
