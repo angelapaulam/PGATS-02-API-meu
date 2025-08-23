@@ -64,9 +64,16 @@ describe('Transfer Controller', () => {
                 });
             
             expect(resposta.status).to.equal(201);
-            expect(resposta.body).to.have.property('from', 'julio');
-            expect(resposta.body).to.have.property('to', 'priscila');
-            expect(resposta.body).to.have.property('value', 100);
+
+            //validação com um Fixture
+            const respostaEsperada = require('../fixture/respostas/quandoInformoValoresValidosEuTenhosucesso')
+            delete resposta.body.date;
+            delete respostaEsperada.date;
+            expect(resposta.body).to.deep.equal(respostaEsperada);
+        
+            //pect(resposta.body).to.have.property('from', 'julio');
+            //pect(resposta.body).to.have.property('to', 'priscila');
+            //pect(resposta.body).to.have.property('value', 100);
 
             // Reseto o Mock
             sinon.restore();
