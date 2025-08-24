@@ -9,8 +9,16 @@ const app = require('../../app');
 // Mock
 const transferService = require('../../service/transferService');
 
+// Adjust middleware bypass for tests
+const authMiddleware = require('../../service/authMiddleware');
+sinon.stub(authMiddleware, 'authenticateToken').callsFake((req, res, next) => next());
+
 // Testes
 describe('Transfer Controller', () => {
+    afterEach(() => {
+        sinon.restore();
+    });
+
     describe('POST /transfers', () => {
         it('Quando informo remetente e destinatario inexistentes recebo 400', async () => {
             const resposta = await request(app)
@@ -40,9 +48,6 @@ describe('Transfer Controller', () => {
             
             expect(resposta.status).to.equal(400);
             expect(resposta.body).to.have.property('error', 'Usuário remetente ou destinatário não encontrado')
-
-            // Reseto o Mock
-            sinon.restore();
         });
 
         it('Usando Mocks: Quando informo valores válidos eu tenho sucesso com 201 CREATED', async () => {
@@ -66,17 +71,8 @@ describe('Transfer Controller', () => {
             expect(resposta.status).to.equal(201);
 
             //validação com um Fixture
-            const respostaEsperada = require('../fixture/respostas/quandoInformoValoresValidosEuTenhosucesso')
-            delete resposta.body.date;
-            delete respostaEsperada.date;
-            expect(resposta.body).to.deep.equal(respostaEsperada);
-        
-            //pect(resposta.body).to.have.property('from', 'julio');
-            //pect(resposta.body).to.have.property('to', 'priscila');
-            //pect(resposta.body).to.have.property('value', 100);
-
-            // Reseto o Mock
-            sinon.restore();
+            const respostaEsperada = require('../fixture/respostas/quandoInformoValoresValidosEuTenhoSucesso');
+            expect({ ...resposta.body, date: undefined }).to.deep.equal({ ...respostaEsperada, date: undefined });
         });
     });
 
