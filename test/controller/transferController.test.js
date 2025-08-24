@@ -9,23 +9,28 @@ const app = require('../../app');
 // Mock
 const transferService = require('../../service/transferService');
 
-// Adjust middleware bypass for tests
-const authMiddleware = require('../../service/authMiddleware');
-sinon.stub(authMiddleware, 'authenticateToken').callsFake((req, res, next) => next());
-
 // Testes
 describe('Transfer Controller', () => {
-    afterEach(() => {
-        sinon.restore();
-    });
-
     describe('POST /transfers', () => {
+
+        beforeEach(async () => {
+            const respostaLogin = await request(app)
+                .post('/users/login')
+                .send({
+                    username: 'julio',
+                    password: '123456'
+                });
+
+            token = respostaLogin.body.token;
+        });
+
         it('Quando informo remetente e destinatario inexistentes recebo 400', async () => {
             const resposta = await request(app)
                 .post('/transfers')
+                .set('Authorization', `Bearer ${token}`)
                 .send({
                     from: "julio",
-                    to: "priscila",
+                    to: "isabelle",
                     value: 100
                 });
             
@@ -40,6 +45,7 @@ describe('Transfer Controller', () => {
 
             const resposta = await request(app)
                 .post('/transfers')
+                .set('Authorization', `Bearer ${token}`)
                 .send({
                     from: "julio",
                     to: "priscila",
@@ -47,7 +53,7 @@ describe('Transfer Controller', () => {
                 });
             
             expect(resposta.status).to.equal(400);
-            expect(resposta.body).to.have.property('error', 'Usuário remetente ou destinatário não encontrado')
+            expect(resposta.body).to.have.property('error', 'Usuário remetente ou destinatário não encontrado');
         });
 
         it('Usando Mocks: Quando informo valores válidos eu tenho sucesso com 201 CREATED', async () => {
@@ -62,18 +68,31 @@ describe('Transfer Controller', () => {
 
             const resposta = await request(app)
                 .post('/transfers')
+                .set('Authorization', `Bearer ${token}`)
                 .send({
                     from: "julio",
-                    to: "priscila",
+                    to: "priscilaaaaaaaaaaa",
                     value: 100
                 });
             
             expect(resposta.status).to.equal(201);
+            
+            // Validação com um Fixture
+            const respostaEsperada = require('../fixture/respostas/quandoInformoValoresValidosEuTenhoSucessoCom201Created.json')
+            delete resposta.body.date;
+            delete respostaEsperada.date; 
+            expect(resposta.body).to.deep.equal(respostaEsperada);
 
-            //validação com um Fixture
-            const respostaEsperada = require('../fixture/respostas/quandoInformoValoresValidosEuTenhoSucesso');
-            expect({ ...resposta.body, date: undefined }).to.deep.equal({ ...respostaEsperada, date: undefined });
+            // Um expect para comparar a Resposta.body com a String contida no arquivo
+            // expect(resposta.body).to.have.property('from', 'julio');
+            // expect(resposta.body).to.have.property('to', 'priscila');
+            // expect(resposta.body).to.have.property('value', 100);
         });
+
+        afterEach(() => {
+            // Reseto o Mock
+            sinon.restore();
+        })
     });
 
     describe('GET /transfers', () => {

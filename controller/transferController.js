@@ -1,11 +1,10 @@
+
 const express = require('express');
 const router = express.Router();
 const transferService = require('../service/transferService');
-const authMiddleware = require('../service/authMiddleware');
+const authenticateToken = require('../middleware/authenticateToken');
 
-router.use(authMiddleware); // Apply middleware to all transfer routes
-
-router.post('/', (req, res) => {
+router.post('/', authenticateToken, (req, res) => {
   const { from, to, value } = req.body;
   if (!from || !to || typeof value !== 'number') return res.status(400).json({ error: 'Campos obrigatórios: from, to, value' });
   try {
@@ -16,7 +15,8 @@ router.post('/', (req, res) => {
   }
 });
 
-router.get('/', (req, res) => {
+
+router.get('/', authenticateToken, (req, res) => {
   res.json(transferService.listTransfers());
 });
 
